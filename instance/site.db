@@ -1,0 +1,49 @@
+CREATE DATABASE aura_db;
+USE aura_db;
+
+-- Users Table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20) NULL,
+    dob DATE NULL,
+    password VARCHAR(500) NOT NULL
+);
+
+-- Images Table
+CREATE TABLE images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_path VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Leaderboard Table
+CREATE TABLE leaderboard (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_path VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    original_image_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (original_image_id) REFERENCES images(id) ON DELETE CASCADE
+);
+
+-- Leaderboard Comments Table
+CREATE TABLE leaderboard_comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text VARCHAR(500) NOT NULL,
+    user_id INT NOT NULL,
+    leaderboard_image_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (leaderboard_image_id) REFERENCES leaderboard(id) ON DELETE CASCADE
+);
+
+-- Leaderboard Likes Table
+CREATE TABLE leaderboard_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    leaderboard_image_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (leaderboard_image_id) REFERENCES leaderboard(id) ON DELETE CASCADE
+);
