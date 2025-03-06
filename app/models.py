@@ -24,6 +24,14 @@ class Users(Base):
     comments: Mapped[List['LeaderboardComment']] = relationship('LeaderboardComment', back_populates='user')
     likes: Mapped[List['LeaderboardLike']] = relationship('LeaderboardLike', back_populates='user')
 
+    
+    friends = relationship(
+        "Users",
+        secondary="friends",
+        primaryjoin="Users.id == Friends.user_id",
+        secondaryjoin="Users.id == Friends.friend_id",
+        backref="friend_of"
+    )
 
 class Images(Base):
     __tablename__ = 'images'
@@ -34,7 +42,6 @@ class Images(Base):
 
     user: Mapped['Users'] = relationship('Users', back_populates='images')
     leaderboard: Mapped[List['Leaderboard']] = relationship('Leaderboard', back_populates='original_image')
-
 
 class Leaderboard(Base):
     __tablename__ = 'leaderboard'
@@ -62,7 +69,6 @@ class Leaderboard(Base):
         """Get the total number of comments dynamically."""
         return db.session.query(LeaderboardComment).filter_by(leaderboard_image_id=self.id).count()
 
-
 class LeaderboardComment(Base):
     __tablename__ = 'leaderboard_comments'
 
@@ -74,7 +80,6 @@ class LeaderboardComment(Base):
     user: Mapped['Users'] = relationship('Users', back_populates='comments')
     leaderboard_image: Mapped['Leaderboard'] = relationship('Leaderboard', back_populates='comments')
 
-
 class LeaderboardLike(Base):
     __tablename__ = 'leaderboard_likes'
 
@@ -84,5 +89,17 @@ class LeaderboardLike(Base):
 
     user: Mapped['Users'] = relationship('Users', back_populates='likes')
     leaderboard_image: Mapped['Leaderboard'] = relationship('Leaderboard', back_populates='likes')
+
+class Friends(Base):
+    __tablename__ = 'friends'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(db.ForeignKey('users.id'))
+    friend_id: Mapped[int] = mapped_column(db.ForeignKey('users.id'))
+
+    
+    user: Mapped['Users'] = relationship('Users', foreign_keys=[user_id])
+    friend: Mapped['Users'] = relationship('Users', foreign_keys=[friend_id])
+
 
 

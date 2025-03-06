@@ -1,9 +1,9 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
 from . import leaderboard_bp
 from app.models import db, Leaderboard, LeaderboardLike, LeaderboardComment
-from .schemas.leaderboard_schema import LeaderboardSchema
-from .schemas.likes_schema import LikeSchema
-from .schemas.comments_schema import CommentSchema
+from .schema import LeaderboardSchema
+from .schema import LikeSchema
+from .schema import CommentSchema
 
 # Create instances of the schemas
 leaderboard_schema = LeaderboardSchema()
@@ -15,7 +15,7 @@ comment_schema = CommentSchema()
 def get_leaderboard():
     try:
         # get all leaderboard images
-        leaderboard = Leaderboard.queary.all()
+        leaderboard = db.session.query(Leaderboard).all()
         # return the leaderboard images
         return jsonify(leaderboard_schema.dump(leaderboard, many=True)), 200
     # except statement to catch any exceptions that may occur
@@ -28,7 +28,7 @@ def get_leaderboard():
 def add_leaderboard():
     try:
         # get the data from the request
-        data = request.get.json()
+        data = request.get_json()
         # validate the data
         errors = leaderboard_schema.validate(data)
         # if there are errors, return a 400 response
@@ -55,8 +55,8 @@ def add_leaderboard():
 @leaderboard_bp.route('/<int:image_id>/like', methods=['POST'])
 def like_leaderboard(image_id):
     try:
-        # get the leaderboard image by id
-        data = request.get.json()
+        # get the data from the request
+        data = request.get_json()
         # validate the data
         errors = like_schema.validate(data)
         # if there are errors, return a 400 response
@@ -64,7 +64,10 @@ def like_leaderboard(image_id):
             return jsonify({'error': 'Validation errors', 'details': errors}), 400
         
         # create a new like object
-        new_like = LeaderboardLike(user_id=data['user_id'], leaderboard_image_id=image_id)
+        new_like = LeaderboardLike(
+            user_id=data['user_id'],
+            leaderboard_image_id=image_id
+        )
 
         # add the like to the database
         db.session.add(new_like)
